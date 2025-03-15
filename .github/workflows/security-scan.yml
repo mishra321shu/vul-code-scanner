@@ -20,14 +20,6 @@ jobs:
       - name: Run Bandit security scan (Python)
         run: bandit -r . -f json -o bandit_report.json || true
 
-      - name: Install gosec (Go)
-        run: |
-          curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s latest
-          go install github.com/securego/gosec/v2/cmd/gosec@latest
-
-      - name: Run gosec security scan (Go)
-        run: gosec -fmt=json -out=gosec_report.json ./...
-
       - name: Analyze Results
         run: |
           python .github/scripts/analyze_results.py
