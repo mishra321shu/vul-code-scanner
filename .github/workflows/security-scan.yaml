@@ -1,34 +1,32 @@
 name: Security Scan
-on:
+
+on: 
   pull_request:
     branches:
       - main
 
 jobs:
-  bandit-scan:
+  security_scan:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Bandit
+      - name: Install dependencies (Python)
         run: pip install bandit
 
-      - name: Run Bandit Security Scan
-        run: bandit -r .
+      - name: Run Bandit security scan (Python)
+        run: bandit -r . -f json -o bandit_report.json || true
 
-      - name: Check Bandit Output
+      - name: Install gosec (Go)
         run: |
-          if bandit -r . | grep -q "high"; then
-            echo "Block"
-            exit 1
-          else
-            echo "Successful"
-          fi
+          curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s latest
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
 
-      - name: Auto-merge if successful
-        if: success()
-        uses: pascalgn/automerge-action@v0.15.4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run gosec security scan (Go)
+        run: gosec -fmt=json -out=gosec_report.json ./...
 
+      - name: Analyze Results
+        run: |
+          python .github/scripts/analyze_results.py
