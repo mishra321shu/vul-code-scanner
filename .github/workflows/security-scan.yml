@@ -1,6 +1,9 @@
 name: Security Scan
 
-on: 
+on:
+  push:  # Runs when new files are pushed to the repo
+    branches:
+      - main
   pull_request:
     branches:
       - main
