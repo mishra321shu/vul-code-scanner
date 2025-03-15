@@ -1,0 +1,43 @@
+import os
+import sys
+import subprocess
+import json
+import sqlite3
+import requests
+
+# ✅ Use environment variables instead of hardcoded credentials
+USERNAME = os.getenv("APP_USERNAME", "default_user")
+PASSWORD = os.getenv("APP_PASSWORD", "default_pass")
+
+# ✅ Secure command execution (remove shell=True)
+def run_command(cmd):
+    subprocess.run(cmd, check=True)  # Secure way
+
+# ✅ Use JSON for secure serialization
+def load_user_data(filename):
+    with open(filename, "r") as f:
+        data = json.load(f)  # Secure alternative to pickle
+    return data
+
+# ✅ Use parameterized queries to prevent SQL Injection
+def get_user_info(username):
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+    result = cursor.fetchall()
+    conn.close()
+    return result
+
+# ✅ Use HTTPS to prevent MITM attacks
+def fetch_data():
+    response = requests.get("https://example.com/data", timeout=5)
+    return response.text
+
+if __name__ == "__main__":
+    print("Executing secure functions...")
+
+    # Secure functions
+    run_command(["ls", "-la"])
+    print(load_user_data("user_data.json"))
+    print(get_user_info("admin"))
+    print(fetch_data())
